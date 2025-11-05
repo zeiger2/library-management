@@ -1,6 +1,9 @@
 package com.artzver.library.service.impl;
 
+import com.artzver.library.dto.CreateBookDTO;
+import com.artzver.library.entity.Author;
 import com.artzver.library.entity.Book;
+import com.artzver.library.entity.Category;
 import com.artzver.library.repository.BookRepository;
 import com.artzver.library.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,5 +59,18 @@ public class BookServiceImpl implements BookService {
 
     public List<Book> findOverdueBooks() {
         return bookRepository.findOverdueBooks();
+    }
+
+    // Метод для создания книги с автором и категорией
+    public Book createBookWithAuthorAndCategory(CreateBookDTO dto, Author author, Category
+            category) {
+        Book book = new Book();
+        book.setTitle(dto.getTitle());
+        book.setIsbn(dto.getIsbn());
+        book.setPublicationDate(dto.getPublicationDate());
+        book.setAvailableCopies(dto.getAvailableCopies());
+        book.setAuthor(author);
+        book.setCategory(category);
+        return save(book);
     }
 }
