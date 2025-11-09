@@ -4,12 +4,15 @@ import com.artzver.library.dto.BookDTO;
 import com.artzver.library.dto.CreateBookDTO;
 import com.artzver.library.entity.Book;
 import com.artzver.library.service.BookService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -122,5 +125,33 @@ public class BookController {
         book.setPublicationDate(dto.getPublicationDate());
         book.setAvailableCopies(dto.getAvailableCopies());
         return book;
+    }
+
+    @GetMapping("/debug")
+    public ResponseEntity<?> debugBooks(HttpServletRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+        System.out.println("=== BOOKS DEBUG ===");
+        System.out.println("Session ID: " + request.getSession().getId());
+        System.out.println("Authentication: " + auth);
+        System.out.println("Principal: " + auth.getPrincipal());
+        System.out.println("Authenticated: " + auth.isAuthenticated());
+        System.out.println("Authorities: " + auth.getAuthorities());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("sessionId", request.getSession().getId());
+        response.put("authenticated", auth.isAuthenticated());
+        response.put("username", auth.getName());
+        response.put("isAnonymous", "anonymousUser".equals(auth.getPrincipal()));
+
+        if (auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            // Возвращаем книги если аутентифицирован
+            response.put("books", Arrays.asList(
+                    Map.of("id", 1, "title", "Война и мир", "author", "Лев Толстой"),
+                    Map.of("id", 2, "title", "Преступление и наказание", "author", "Федор Достоевский")
+            ));
+        }
+
+        return ResponseEntity.ok(response);
     }
 }
